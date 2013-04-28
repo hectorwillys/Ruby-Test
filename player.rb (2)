@@ -1,0 +1,52 @@
+class Player
+  def play_turn(warrior)
+		enemy_count = 0
+		str_listen = warrior.listen.to_s[1..-2].split(', ')
+		dir = [:right,:left,:forward,:backward]
+		cap_dir = []
+		ene_dir = []
+		dir.each {
+			|d|
+			if(warrior.feel d).captive?
+				cap_dir.push d 
+			elsif(warrior.feel d).enemy?
+				ene_dir.push d 
+				enemy_count += 1
+			end
+		}
+		if str_listen.include? 'Captive'
+			nextdir = warrior.direction_of warrior.listen[str_listen.index 'Captive']
+			if (warrior.feel nextdir).empty?
+				warrior.walk! nextdir
+			elsif (warrior.feel nextdir).captive?
+				warrior.rescue! nextdir
+			elsif enemy_count == 1
+				warrior.attack! ene_dir.pop
+			else
+				warrior.bind! ene_dir.pop
+			end
+		else
+			if warrior.health < 20
+				warrior.rest!
+			elsif warrior.listen == []
+				warrior.walk! warrior.direction_of_stairs
+			else
+				warrior.walk! (warrior.direction_of warrior.listen[0])
+			end
+		end
+	end
+	
+	def alt_way(dir)
+		dirs = [:right,:left,:forward,:backward]
+		dirs.delete(dir)
+		if dir == :right
+			dirs.delete(:left)
+		elsif dir == :left
+			dirs.delete(:right)
+		elsif dir == :backward
+			dirs.delete(:forward) 
+		else
+			dirs.delete(:backward)
+		end
+	end
+end
